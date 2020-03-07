@@ -27,6 +27,17 @@
                 ${view.content}
                 </div>
             </div>
+            <div class="panel-body" <#if view.thumbnail?? && view.thumbnail?length == 0> hidden </#if>>
+                <div style="display: inline-block">
+                    <span>下载附件：</span>
+                    <li>
+                        <a id="downlink" href="javascript:void(0)" onclick="downloadFile()"><@resource src=view.thumbnail/></a>
+                    </li>
+                </div>
+
+
+            </div>
+
             <div class="panel-footer operate">
                 <#list view.tagsArray as tag>
                     <span>
@@ -166,5 +177,17 @@
             }
         });
     });
+
+    var thumbnail = $("#downlink").text();
+    var filename = thumbnail.split("/").pop();
+    $("#downlink").text(filename);
+
+    function downloadFile() {
+        var form = $('<form method="POST" action="/post/downloadFile">');
+        form.append($('<input type="hidden" name="filename" value="'+ thumbnail +'">'));
+        $('body').append(form);
+        form.submit();
+    }
+
 </script>
 </@layout>

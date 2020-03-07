@@ -471,6 +471,7 @@ abbr[data-original-title], abbr[title] {
     margin-top: 30px;
     margin-bottom: 30px;
     min-height: 600px;
+    height: calc(100% - 120px);
 }
 
 .side-left {

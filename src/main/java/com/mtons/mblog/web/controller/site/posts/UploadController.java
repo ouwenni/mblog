@@ -11,18 +11,23 @@ package com.mtons.mblog.web.controller.site.posts;
 
 import com.mtons.mblog.base.lang.Consts;
 import com.mtons.mblog.base.utils.FileKit;
+import com.mtons.mblog.base.utils.MD5;
+import com.mtons.mblog.modules.data.AccountProfile;
+import com.mtons.mblog.modules.entity.Resource;
+import com.mtons.mblog.modules.repository.ResourceRepository;
 import com.mtons.mblog.web.controller.BaseController;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.ServletRequestUtils;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.support.StandardMultipartHttpServletRequest;
 
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
-import java.io.IOException;
+import javax.servlet.http.HttpServletResponse;
+import java.io.*;
 import java.util.HashMap;
 
 /**
@@ -50,8 +55,11 @@ public class UploadController extends BaseController {
     @PostMapping("/upload")
     @ResponseBody
     public UploadResult upload(@RequestParam(value = "file", required = false) MultipartFile file,
-                               HttpServletRequest request) throws IOException {
+                               HttpServletRequest request, StandardMultipartHttpServletRequest standardMultipartHttpServletRequest) throws IOException, ServletException {
         UploadResult result = new UploadResult();
+
+        file = standardMultipartHttpServletRequest.getFile("file_data");
+
         String crop = request.getParameter("crop");
         int size = ServletRequestUtils.getIntParameter(request, "size", siteOptions.getIntegerValue(Consts.STORAGE_MAX_WIDTH));
 
@@ -63,9 +71,9 @@ public class UploadController extends BaseController {
         String fileName = file.getOriginalFilename();
 
         // 检查类型
-        if (!FileKit.checkFileType(fileName)) {
+/*        if (!FileKit.checkFileType(fileName)) {
             return result.error(errorInfo.get("TYPE"));
-        }
+        }*/
 
         // 检查大小
         String limitSize = siteOptions.getValue(Consts.STORAGE_LIMIT_SIZE);
@@ -79,14 +87,24 @@ public class UploadController extends BaseController {
         // 保存图片
         try {
             String path;
-            if (StringUtils.isNotBlank(crop)) {
+            /*if (StringUtils.isNotBlank(crop)) {
                 Integer[] imageSize = siteOptions.getIntegerArrayValue(crop, Consts.SEPARATOR_X);
                 int width = ServletRequestUtils.getIntParameter(request, "width", imageSize[0]);
                 int height = ServletRequestUtils.getIntParameter(request, "height", imageSize[1]);
                 path = storageFactory.get().storeScale(file, Consts.thumbnailPath, width, height);
             } else {
                 path = storageFactory.get().storeScale(file, Consts.thumbnailPath, size);
+            }*/
+
+            //修改存储目录
+            AccountProfile profile = getProfile();
+            File filepath = new File("/storage/"+profile.getUsername());
+            if(!filepath.exists()  && !filepath.isDirectory()){
+                filepath.mkdirs();
             }
+            path = storageFactory.get().store(file,"/storage/"+profile.getUsername());
+
+
             result.ok(errorInfo.get("SUCCESS"));
             result.setName(fileName);
             result.setPath(path);
@@ -98,6 +116,120 @@ public class UploadController extends BaseController {
         }
 
         return result;
+    }
+
+    @RequestMapping("/downloadFile")
+    public void downloadFile(HttpServletRequest request, HttpServletResponse response){
+        String fileName = request.getParameter("filename");
+
+        System.out.println(fileName);
+
+
+
+        try {
+
+            //mac系统，所以路径是这样子的。win系统就是D盘什么什么的
+
+            String path = "./" + fileName;
+
+            //这里是下载以后的文件叫做什么名字。我这里是以时间来定义名字的。
+
+            response.setHeader("Content-disposition", String.format("attachment; filename=\"%s\"", fileName));
+
+            response.setContentType("application/octet-stream;charset=utf-8");
+
+            response.setCharacterEncoding("UTF-8");
+
+            OutputStream out;
+
+            FileInputStream inputStream = new FileInputStream(path);
+
+            out = response.getOutputStream();
+
+            byte[] buffer = new byte[1024];
+
+            int len;
+
+            while ((len = inputStream.read(buffer)) != -1) {
+
+                out.write(buffer, 0, len);
+
+            }
+
+            inputStream.close();
+
+            out.close();
+
+            out.flush();
+
+
+
+        } catch (IOException e) {
+
+            e.printStackTrace();
+
+        }
+
+    }
+
+    @Autowired
+    ResourceRepository resourceRepository;
+
+    @RequestMapping("/deleteFile")
+    @ResponseBody
+    public UploadResult deleteFile(@RequestParam(value = "key") String key) throws Exception{
+        UploadResult result = new UploadResult();
+
+        byte[] bytes = fileToBytes("./"+key);
+        String md5 = MD5.md5File(bytes);
+        Resource resource = resourceRepository.findByMd5(md5);
+        resourceRepository.deleteById(resource.getId());
+        return result;
+    }
+
+    public static byte[] fileToBytes(String filePath) {
+        byte[] buffer = null;
+        File file = new File(filePath);
+
+        FileInputStream fis = null;
+        ByteArrayOutputStream bos = null;
+
+        try {
+            fis = new FileInputStream(file);
+            bos = new ByteArrayOutputStream();
+
+            byte[] b = new byte[1024];
+
+            int n;
+
+            while ((n = fis.read(b)) != -1) {
+                bos.write(b, 0, n);
+            }
+
+            buffer = bos.toByteArray();
+        } catch (FileNotFoundException ex) {
+            ex.printStackTrace();
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        } finally {
+            try {
+                if (null != bos) {
+                    bos.close();
+                }
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            } finally{
+                try {
+                    if(null!=fis){
+                        fis.close();
+                    }
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
+            }
+        }
+
+        return buffer;
     }
 
     public static class UploadResult {

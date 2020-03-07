@@ -37,9 +37,9 @@ public abstract class AbstractStorage implements Storage {
             throw new MtonsException("文件不能为空");
         }
 
-        if (!FileKit.checkFileType(file.getOriginalFilename())) {
+       /* if (!FileKit.checkFileType(file.getOriginalFilename())) {
             throw new MtonsException("文件格式不支持");
-        }
+        }*/
     }
 
     @Override
@@ -68,7 +68,8 @@ public abstract class AbstractStorage implements Storage {
         if (resource != null){
             return resource.getPath();
         }
-        String path = FilePathUtils.wholePathName(src, originalFilename, md5);
+//        String path = FilePathUtils.wholePathName(src, originalFilename, md5);
+        String path = src + "/" + originalFilename;
         path = writeToStore(bytes, path);
 
         // 图片入库

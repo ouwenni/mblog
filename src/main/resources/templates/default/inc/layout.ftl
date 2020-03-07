@@ -39,11 +39,15 @@
     <link href="${base}/dist/vendors/simple-line-icons/css/simple-line-icons.css" rel="stylesheet"/>
     <link href="${base}/dist/vendors/font-awesome/css/font-awesome.min.css" rel="stylesheet"/>
 
+    <link href="${base}/dist/vendors/fileinput/css/fileinput.min.css" rel="stylesheet"/>
+
     <script src="${base}/dist/vendors/pace/pace.min.js"></script>
 
     <script src="${base}/dist/js/jquery.min.js"></script>
     <script src="${base}/dist/vendors/layer/layer.js"></script>
     <script src="${base}/dist/vendors/bootstrap/js/bootstrap.min.js"></script>
+    <script src="${base}/dist/vendors/fileinput/js/fileinput.min.js"></script>
+    <script src="${base}/dist/vendors/fileinput/js/locales/zh.js"></script>
 
     <script type="text/javascript">
         var _MTONS = _MTONS || {};
