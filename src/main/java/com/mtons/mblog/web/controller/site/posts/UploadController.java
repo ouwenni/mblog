@@ -76,13 +76,13 @@ public class UploadController extends BaseController {
         }*/
 
         // 检查大小
-        String limitSize = siteOptions.getValue(Consts.STORAGE_LIMIT_SIZE);
+/*        String limitSize = siteOptions.getValue(Consts.STORAGE_LIMIT_SIZE);
         if (StringUtils.isBlank(limitSize)) {
             limitSize = "2";
         }
         if (file.getSize() > (Long.parseLong(limitSize) * 1024 * 1024)) {
             return result.error(errorInfo.get("SIZE"));
-        }
+        }*/
 
         // 保存图片
         try {
@@ -180,10 +180,14 @@ public class UploadController extends BaseController {
     public UploadResult deleteFile(@RequestParam(value = "key") String key) throws Exception{
         UploadResult result = new UploadResult();
 
-        byte[] bytes = fileToBytes("./"+key);
+        String filePath = "./"+key;
+        byte[] bytes = fileToBytes(filePath);
         String md5 = MD5.md5File(bytes);
         Resource resource = resourceRepository.findByMd5(md5);
         resourceRepository.deleteById(resource.getId());
+        File file = new File(filePath);
+        file.delete();
+
         return result;
     }
 

@@ -14,6 +14,14 @@
             <input type="hidden" id="thumbnail" name="thumbnail" value="${view.thumbnail}"/>
 
             <div class="form-group">
+                <select class="form-control" name="channelId" required>
+                    <option value="">请选择栏目</option>
+                    <#list channels as row>
+                        <option value="${row.id}" <#if (view.channelId == row.id)> selected </#if>>${row.name}</option>
+                    </#list>
+                </select>
+            </div>
+            <div class="form-group">
                 <input type="text" class="form-control" name="title" maxlength="128" value="${view.title}" placeholder="请输入标题" required>
             </div>
 
@@ -22,14 +30,7 @@
             </div>
         </div>
         <div class="col-xs-12 col-md-4">
-            <div class="form-group">
-                <select class="form-control" name="channelId" required>
-                    <option value="">请选择栏目</option>
-                    <#list channels as row>
-                        <option value="${row.id}" <#if (view.channelId == row.id)> selected </#if>>${row.name}</option>
-                    </#list>
-                </select>
-            </div>
+
 
             <div class="panel panel-default corner-radius help-box">
                 <div class="panel-heading">
@@ -90,7 +91,7 @@ var initialPreviewConfig = [];
 if("" !== thumbnail){
     initialPreview.push(thumbnail);
     initialPreviewConfig.push({
-        caption: filename, type: postfix, key: thumbnail
+        caption: filename+"."+postfix, type: postfix, key: thumbnail
     })
 }
 
@@ -102,6 +103,16 @@ $("#fileinput").fileinput({
     initialPreview: initialPreview,
     initialPreviewAsData:true,
     initialPreviewConfig: initialPreviewConfig,
+    previewFileIconSettings: {
+        'doc': '<i class="fa fa-file-word-o text-primary"></i>',
+        'docx': '<i class="fa fa-file-word-o text-primary"></i>',
+        'xls': '<i class="fa fa-file-excel-o text-success"></i>',
+        'xlsx': '<i class="fa fa-file-excel-o text-success"></i>',
+        'ppt': '<i class="fa fa-file-powerpoint-o text-danger"></i>',
+        'jpg': '<i class="fa fa-file-photo-o text-warning"></i>',
+        'pdf': '<i class="fa fa-file-pdf-o text-danger"></i>',
+        'zip': '<i class="fa fa-file-archive-o text-muted"></i>',
+    }
 });
 
 
