@@ -78,7 +78,7 @@ site:
         comment: true
     options:
         theme: default
-        site_logo: /dist/images/logo/logo.png
+        site_logo: /dist/images/logo/logo_back.png
         site_favicon: /dist/images/logo/m.png
         storage_max_width: 800
         storage_limit_size: 2
